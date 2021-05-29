@@ -1,12 +1,10 @@
 package com.romix.videoplayer.retrofit
 
-import retrofit2.Retrofit
-
 object RetrofitServices {
-    private const val BASE_VIDEO_SERVICE_URL = ""
+    private const val BASE_VIDEO_SERVICE_URL = "https://api.vimeo.com/"
 
-    val videoService: VideoService
+    val vimeoService: VimeoService
         get() = RetrofitClient
             .getVideoClient(BASE_VIDEO_SERVICE_URL)
-            .create(VideoService::class.java)
+            .create(VimeoService::class.java)
 }
