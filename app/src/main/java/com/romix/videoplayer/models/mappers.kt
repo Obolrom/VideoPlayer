@@ -21,7 +21,8 @@ class VideoMapper: Mapper<VideoDTO, Video> {
             name        = input.name,
             duration    = input.duration,
             width       = input.width,
-            height      = input.height
+            height      = input.height,
+            quality     = videoFile.quality
         )
     }
 

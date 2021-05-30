@@ -9,5 +9,6 @@ data class Video(
     val name: String,
     val duration: Int,
     val width: Int,
-    val height: Int
+    val height: Int,
+    val quality: String
 )
