@@ -2,7 +2,7 @@ package com.romix.videoplayer.retrofit.dto
 
 import com.google.gson.annotations.SerializedName
 
-data class Video(
+data class VideoDTO(
     @SerializedName("uri")
     val uri: String,
 

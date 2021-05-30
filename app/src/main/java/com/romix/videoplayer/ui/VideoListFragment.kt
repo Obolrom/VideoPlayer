@@ -5,45 +5,65 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.romix.videoplayer.App
-import com.romix.videoplayer.databinding.FragmentFirstBinding
+import com.romix.videoplayer.R
+import com.romix.videoplayer.models.Video
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
-class VideoListFragment : Fragment() {
+class VideoListFragment : Fragment(), VideoAdapter.OnVideoClickListener {
 
-    private var _binding: FragmentFirstBinding? = null
     private val videoViewModel: VideoViewModel by viewModels {
         VideoViewModelFactory((activity?.application as App).repository)
     }
-
-    private val binding get() = _binding!!
+    private lateinit var videoRV: RecyclerView
+    private lateinit var buttonFirst: AppCompatButton
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentFirstBinding.inflate(inflater, container, false)
-        return binding.root
+        val root = inflater.inflate(R.layout.fragment_video_list, container, false)
+        with(root) {
+            videoRV = findViewById(R.id.video_list_rv)
+            buttonFirst = findViewById(R.id.button_first)
+        }
+
+        return root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.buttonFirst.setOnClickListener {
+        val videoAdapter = VideoAdapter(this)
+        with(videoRV) {
+            setHasFixedSize(true)
+            adapter = videoAdapter
+            layoutManager = LinearLayoutManager(context)
+        }
+
+        videoViewModel.getVideos().observe(viewLifecycleOwner, { videos ->
+            videoAdapter.submitList(videos)
+            videoAdapter.notifyDataSetChanged()
+        })
+
+        buttonFirst.setOnClickListener {
             videoViewModel.getVideo("556584835")
 //            videoViewModel.getVideos()
 //            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    override fun onVideoClick(video: Video) {
+        Toast.makeText(context, video.imageUrl, Toast.LENGTH_LONG).show()
     }
 }
 

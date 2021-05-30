@@ -2,9 +2,9 @@ package com.romix.videoplayer.models
 
 
 data class Video(
-    val imageUrl: List<String>,
+    val imageUrl: String,
     val video_id: Int,
-    val video_link: List<String>,
+    val video_link: String,
     val size: Int,
     val name: String,
     val duration: Int,

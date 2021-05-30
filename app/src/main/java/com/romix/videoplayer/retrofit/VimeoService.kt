@@ -1,6 +1,6 @@
 package com.romix.videoplayer.retrofit
 
-import com.romix.videoplayer.retrofit.dto.Video
+import com.romix.videoplayer.retrofit.dto.VideoDTO
 import com.romix.videoplayer.retrofit.dto.VideoPlaylistPage
 import io.reactivex.Single
 import retrofit2.http.GET
@@ -11,5 +11,5 @@ interface VimeoService {
     fun getVideos(): Single<VideoPlaylistPage>
 
     @GET("videos/{video_id}")
-    fun getVideo(@Path("video_id") id: String): Single<Video>
+    fun getVideo(@Path("video_id") id: String): Single<VideoDTO>
 }

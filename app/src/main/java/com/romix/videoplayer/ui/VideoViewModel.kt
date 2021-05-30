@@ -3,12 +3,14 @@ package com.romix.videoplayer.ui
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.romix.videoplayer.models.Video
 import com.romix.videoplayer.repository.Repository
+import com.romix.videoplayer.retrofit.dto.VideoDTO
 
 class VideoViewModel(private val repository: Repository): ViewModel() {
 
-    fun getVideos() {
-        repository.getVideos()
+    fun getVideos(): LiveData<List<Video>> {
+        return repository.getVideos()
     }
 
     fun getVideo(videoId: String) {
