@@ -7,9 +7,9 @@
 
     <fragment
         android:id="@+id/FirstFragment"
-        android:name="com.romix.videoplayer.FirstFragment"
+        android:name="com.romix.videoplayer.ui.VideoListFragment"
         android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
+        tools:layout="@layout/fragment_video_list">
 
         <action
             android:id="@+id/action_FirstFragment_to_SecondFragment"
@@ -17,12 +17,8 @@
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"
-        android:name="com.romix.videoplayer.SecondFragment"
+        android:name="com.romix.videoplayer.ui.VideoPlayerFragment"
         android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second">
-
-        <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
+        tools:layout="@layout/fragment_video_player">
     </fragment>
 </navigation>
