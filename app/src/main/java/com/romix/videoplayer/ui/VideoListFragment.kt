@@ -35,8 +35,8 @@ class VideoListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.buttonFirst.setOnClickListener {
-//            videoViewModel.getVideo("556584835")
-            videoViewModel.getVideos()
+            videoViewModel.getVideo("556584835")
+//            videoViewModel.getVideos()
 //            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
         }
     }
