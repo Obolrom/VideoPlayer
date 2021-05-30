@@ -49,7 +49,7 @@ class VideoPlayerFragment : Fragment() {
 
         sharedVideoViewModel.currentVideo.observe(viewLifecycleOwner, {
             player?.setMediaItem(MediaItem.Builder()
-                .setUri(it.video_link)
+                .setUri(it.videoLink)
                 .build())
             startPlay()
         })

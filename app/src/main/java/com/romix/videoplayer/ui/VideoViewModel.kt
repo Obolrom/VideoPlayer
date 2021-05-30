@@ -14,8 +14,8 @@ class VideoViewModel(private val repository: Repository): ViewModel() {
         return repository.getVideos()
     }
 
-    fun getVideo(videoId: String) {
-        repository.getVideo(videoId)
+    fun getVideo(videoId: String): LiveData<Video> {
+        return repository.getVideo(videoId)
     }
 }
 
