@@ -6,13 +6,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import com.romix.videoplayer.models.Video
 import com.romix.videoplayer.repository.Repository
+import com.romix.videoplayer.room.VideoEntity
 
 class VideoViewModel(private val repository: Repository): ViewModel() {
 
-    val videos: LiveData<List<Video>> = repository.videoList
-
-//    fixme this is not correct, because we should return domain model from repository
-//    val getAll = repository.getAll()
+    val videos: LiveData<List<VideoEntity>> = repository.videoList.asLiveData()
 
     fun getVideo(videoId: String): LiveData<Video> {
         return repository.getVideo(videoId)

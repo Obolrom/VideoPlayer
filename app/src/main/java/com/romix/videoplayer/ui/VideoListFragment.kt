@@ -55,22 +55,12 @@ class VideoListFragment : Fragment(), VideoAdapter.OnVideoClickListener {
             layoutManager = LinearLayoutManager(context)
         }
 
-        videoViewModel.videos.observe(viewLifecycleOwner, { videos ->
+//        fixme this is not correct, because we should return DOMAIN model from repository
+        videoViewModel.videos.observe(viewLifecycleOwner, { entities ->
+            val videos = VideoListMapper(VideoMapperVideoEntityToVideo()).map(entities)
             videoAdapter.submitList(videos)
             videoAdapter.notifyDataSetChanged()
-            videos.forEach {
-                Log.d("video", it.toString())
-            }
         })
-//        fixme this is not correct, because we should return domain model from repository
-//        videoViewModel.getAll.observe(viewLifecycleOwner, { list ->
-//            val videos = VideoListMapper(VideoMapperVideoEntityToVideo()).map(list)
-//            videoAdapter.submitList(videos)
-//            videoAdapter.notifyDataSetChanged()
-//            videos.forEach {
-//                Log.d("video", it.toString())
-//            }
-//        })
     }
 
     override fun onVideoClick(video: Video) {

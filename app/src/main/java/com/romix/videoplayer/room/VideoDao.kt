@@ -1,6 +1,5 @@
 package com.romix.videoplayer.room
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -11,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface VideoDao {
     @Query("select * from video")
-    fun getAllVideos(): LiveData<List<VideoEntity>>
+    fun getAllVideos(): Flow<List<VideoEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(videos: List<VideoEntity>)

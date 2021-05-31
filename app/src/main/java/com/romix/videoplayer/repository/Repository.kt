@@ -16,8 +16,7 @@ import com.romix.videoplayer.room.VideoEntity
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class Repository(private val app: App) {
@@ -25,22 +24,22 @@ class Repository(private val app: App) {
     private val vimeoService: VimeoService by lazy { RetrofitServices.vimeoService }
     private val database: VideoDatabase by lazy { VideoDatabase.getDatabase(app.baseContext, appScope) }
 
-    val videoList: LiveData<List<Video>> = loadVideos()
+    val videoList: Flow<List<VideoEntity>> = loadVideos()
 
-    private fun loadVideos(): LiveData<List<Video>> {
-        val entities = getVideosFromDb()
-        return loadVideosFromService()
+    private fun loadVideos(): Flow<List<VideoEntity>> {
+        loadVideosFromService()
+        return getVideosFromDb()
     }
 
-    private fun loadVideosFromService(): LiveData<List<Video>> {
-        val videos = MutableLiveData<List<Video>>()
+    private fun loadVideosFromService(): MutableStateFlow<List<VideoEntity>> {
+        val videos = MutableStateFlow(listOf<VideoEntity>())
         vimeoService.getVideos()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : DisposableSingleObserver<VideoPlaylistPage>() {
                 override fun onSuccess(response: VideoPlaylistPage) {
                     val models = VideoListMapper(VideoMapperVideoDtoToVideo()).map(response.videos)
-                    videos.value = models
+                    videos.value = VideoListMapper(VideoMapperVideoToVideoEntity()).map(models)
                     appScope.launch { insertVideos(models) }
                 }
 
@@ -71,11 +70,11 @@ class Repository(private val app: App) {
         database.videoDao().insert(entities)
     }
 
-    fun getAll() = database.videoDao().getAllVideos()
-
-    private fun getVideosFromDb(): LiveData<List<VideoEntity>> {
+    private fun getVideosFromDb(): Flow<List<VideoEntity>> {
         val dataFromDb = database.videoDao().getAllVideos()
-        val models = MutableLiveData<List<Video>>()
+        dataFromDb.map {
+
+        }
         return dataFromDb
     }
 }
