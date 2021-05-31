@@ -11,6 +11,7 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.exoplayer2.util.Util
 import com.romix.videoplayer.databinding.FragmentVideoPlayerBinding
 
 /**
@@ -23,12 +24,11 @@ class VideoPlayerFragment : Fragment() {
     private lateinit var playerView: PlayerView
     private var player: ExoPlayer? = null
 
+    // FIXME: 30.05.21 move it to the class, maybe cache it
     private var playWhenReady = true
     private var currentWindow = 0
     private var playbackPosition: Long = 0
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -49,8 +49,9 @@ class VideoPlayerFragment : Fragment() {
 
         sharedVideoViewModel.currentVideo.observe(viewLifecycleOwner, {
             player?.setMediaItem(MediaItem.Builder()
-                .setUri(it.video_link)
+                .setUri(it.videoLink)
                 .build())
+            startPlay()
         })
     }
 
@@ -67,6 +68,9 @@ class VideoPlayerFragment : Fragment() {
         }
 
         playerView.player = player
+    }
+
+    private fun startPlay() {
         with(player!!) {
             playWhenReady = playWhenReady
             seekTo(currentWindow, playbackPosition)
@@ -81,6 +85,34 @@ class VideoPlayerFragment : Fragment() {
             playWhenReady = it.playWhenReady
             it.release()
             player = null
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (Util.SDK_INT > 23) {
+            initPlayer()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (Util.SDK_INT <= 23 || player == null) {
+            initPlayer()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (Util.SDK_INT <= 23) {
+            releasePlayer()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (Util.SDK_INT > 23) {
+            releasePlayer()
         }
     }
 

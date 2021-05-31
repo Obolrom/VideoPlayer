@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.romix.videoplayer.App
 import com.romix.videoplayer.R
 import com.romix.videoplayer.models.Video
+import com.romix.videoplayer.models.VideoListMapper
+import com.romix.videoplayer.models.VideoMapperVideoEntityToVideo
 import com.squareup.picasso.Picasso
 
 /**
@@ -53,12 +55,11 @@ class VideoListFragment : Fragment(), VideoAdapter.OnVideoClickListener {
             layoutManager = LinearLayoutManager(context)
         }
 
-        videoViewModel.getVideos().observe(viewLifecycleOwner, { videos ->
+//        fixme this is not correct, because we should return DOMAIN model from repository
+        videoViewModel.videos.observe(viewLifecycleOwner, { entities ->
+            val videos = VideoListMapper(VideoMapperVideoEntityToVideo()).map(entities)
             videoAdapter.submitList(videos)
             videoAdapter.notifyDataSetChanged()
-            videos.forEach {
-                Log.d("video", it.toString())
-            }
         })
     }
 
