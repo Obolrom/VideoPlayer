@@ -1,13 +1,12 @@
 package com.romix.videoplayer.repository
 
+import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
 import com.romix.videoplayer.App
-import com.romix.videoplayer.models.Video
-import com.romix.videoplayer.models.VideoListMapper
-import com.romix.videoplayer.models.VideoMapperVideoDtoToVideo
-import com.romix.videoplayer.models.VideoMapperVideoToVideoEntity
+import com.romix.videoplayer.models.*
 import com.romix.videoplayer.retrofit.RetrofitServices
 import com.romix.videoplayer.retrofit.VimeoService
 import com.romix.videoplayer.retrofit.dto.VideoDTO
@@ -17,7 +16,8 @@ import com.romix.videoplayer.room.VideoEntity
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class Repository(private val app: App) {
@@ -25,10 +25,14 @@ class Repository(private val app: App) {
     private val vimeoService: VimeoService by lazy { RetrofitServices.vimeoService }
     private val database: VideoDatabase by lazy { VideoDatabase.getDatabase(app.baseContext, appScope) }
 
-    // add mapping
-//    val allVideos: Flow<List<Video>> = database.videoDao().getAllVideos()
+    val videoList: LiveData<List<Video>> = loadVideos()
 
-    fun getVideos(): LiveData<List<Video>> {
+    private fun loadVideos(): LiveData<List<Video>> {
+        val entities = getVideosFromDb()
+        return loadVideosFromService()
+    }
+
+    private fun loadVideosFromService(): LiveData<List<Video>> {
         val videos = MutableLiveData<List<Video>>()
         vimeoService.getVideos()
             .subscribeOn(Schedulers.io())
@@ -37,9 +41,7 @@ class Repository(private val app: App) {
                 override fun onSuccess(response: VideoPlaylistPage) {
                     val models = VideoListMapper(VideoMapperVideoDtoToVideo()).map(response.videos)
                     videos.value = models
-                    val videoEntities = VideoListMapper(VideoMapperVideoToVideoEntity())
-                        .map(models)
-                    appScope.launch { insertVideos(videoEntities) }
+                    appScope.launch { insertVideos(models) }
                 }
 
                 override fun onError(e: Throwable) { }
@@ -63,6 +65,17 @@ class Repository(private val app: App) {
     }
 
     @WorkerThread
-    suspend fun insertVideos(videos: List<VideoEntity>) =
-        database.videoDao().insert(videos)
+    suspend fun insertVideos(videos: List<Video>) {
+        val entities = VideoListMapper(VideoMapperVideoToVideoEntity())
+            .map(videos)
+        database.videoDao().insert(entities)
+    }
+
+    fun getAll() = database.videoDao().getAllVideos()
+
+    private fun getVideosFromDb(): LiveData<List<VideoEntity>> {
+        val dataFromDb = database.videoDao().getAllVideos()
+        val models = MutableLiveData<List<Video>>()
+        return dataFromDb
+    }
 }

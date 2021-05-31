@@ -12,6 +12,7 @@ abstract class VideoDatabase: RoomDatabase() {
     abstract fun videoDao(): VideoDao
 
     companion object {
+        @Volatile
         private var INSTANCE: VideoDatabase? = null
 
         fun getDatabase(context: Context, scope: CoroutineScope): VideoDatabase {

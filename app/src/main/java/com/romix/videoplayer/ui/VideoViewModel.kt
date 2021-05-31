@@ -1,18 +1,18 @@
 package com.romix.videoplayer.ui
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import com.romix.videoplayer.models.Video
 import com.romix.videoplayer.repository.Repository
-import com.romix.videoplayer.retrofit.dto.VideoDTO
 
 class VideoViewModel(private val repository: Repository): ViewModel() {
 
-    fun getVideos(): LiveData<List<Video>> {
-        return repository.getVideos()
-    }
+    val videos: LiveData<List<Video>> = repository.videoList
+
+//    fixme this is not correct, because we should return domain model from repository
+//    val getAll = repository.getAll()
 
     fun getVideo(videoId: String): LiveData<Video> {
         return repository.getVideo(videoId)
