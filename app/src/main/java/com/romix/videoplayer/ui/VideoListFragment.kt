@@ -55,9 +55,7 @@ class VideoListFragment : Fragment(), VideoAdapter.OnVideoClickListener {
             layoutManager = LinearLayoutManager(context)
         }
 
-//        fixme this is not correct, because we should return DOMAIN model from repository
-        videoViewModel.videos.observe(viewLifecycleOwner, { entities ->
-            val videos = VideoListMapper(VideoMapperVideoEntityToVideo()).map(entities)
+        videoViewModel.videos.observe(viewLifecycleOwner, { videos ->
             videoAdapter.submitList(videos)
             videoAdapter.notifyDataSetChanged()
         })
