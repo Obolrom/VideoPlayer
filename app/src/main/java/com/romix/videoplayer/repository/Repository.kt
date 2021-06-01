@@ -70,7 +70,7 @@ class Repository(private val app: App) {
 
     private fun getVideosFromDb(): Flow<List<Video>> {
         val stateFlow = MutableStateFlow(listOf<Video>())
-        appScope.launch(Dispatchers.Unconfined) {
+        appScope.launch(Dispatchers.IO) {
             try {
                 database.videoDao().getAllVideos().collect {
                     stateFlow.value = VideoListMapper(VideoMapperVideoEntityToVideo()).map(it)

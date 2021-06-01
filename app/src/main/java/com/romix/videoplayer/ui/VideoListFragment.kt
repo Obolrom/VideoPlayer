@@ -19,6 +19,7 @@ import com.romix.videoplayer.models.Video
 import com.romix.videoplayer.models.VideoListMapper
 import com.romix.videoplayer.models.VideoMapperVideoEntityToVideo
 import com.squareup.picasso.Picasso
+import java.util.*
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -62,7 +63,10 @@ class VideoListFragment : Fragment(), VideoAdapter.OnVideoClickListener {
     }
 
     override fun onVideoClick(video: Video) {
-        sharedVideoViewModel.changeCurrentVideo(video)
+        with(sharedVideoViewModel) {
+            updatePlaylist(videoViewModel.videos.value!!)
+            changeCurrentVideo(video)
+        }
         findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
     }
 }
