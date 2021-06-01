@@ -48,6 +48,8 @@ class VideoPlayerFragment : Fragment() {
     }
 
     private fun initPlaylist() {
+        videoState.currentWindow = sharedVideoViewModel.videoIndex.value ?: 0
+
         sharedVideoViewModel.playlist.observe(viewLifecycleOwner, {
             val mediaItems = mutableListOf<MediaItem>()
             it.forEach { video ->

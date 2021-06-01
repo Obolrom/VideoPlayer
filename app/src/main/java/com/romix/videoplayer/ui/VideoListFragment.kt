@@ -65,6 +65,7 @@ class VideoListFragment : Fragment(), VideoAdapter.OnVideoClickListener {
     override fun onVideoClick(video: Video) {
         with(sharedVideoViewModel) {
             updatePlaylist(videoViewModel.videos.value!!)
+            updateVideoIndex(videoViewModel.videos.value!!.indexOf(video))
             changeCurrentVideo(video)
         }
         findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
