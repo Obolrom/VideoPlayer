@@ -49,12 +49,6 @@ class VideoPlayerFragment : Fragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        initPlayer()
-        initPlaylist()
-    }
-
     private fun initPlaylist() {
         sharedVideoViewModel.playlist.observe(viewLifecycleOwner, {
             val mediaItems = mutableListOf<MediaItem>()
@@ -66,7 +60,6 @@ class VideoPlayerFragment : Fragment() {
                     .build())
             }
             player?.addMediaItems(mediaItems)
-            startPlay()
         })
     }
 
@@ -84,13 +77,14 @@ class VideoPlayerFragment : Fragment() {
 
         playerView.player = player
         player?.addListener(playbackStateListener)
+        initPlaylist()
+        startPlay()
     }
 
     private fun startPlay() {
         with(player!!) {
             playWhenReady = playWhenReady
             seekTo(currentWindow, playbackPosition)
-            playbackState
             prepare()
             play()
         }
