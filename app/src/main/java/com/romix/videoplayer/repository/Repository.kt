@@ -16,6 +16,7 @@ import com.romix.videoplayer.room.VideoEntity
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -24,28 +25,25 @@ class Repository(private val app: App) {
     private val vimeoService: VimeoService by lazy { RetrofitServices.vimeoService }
     private val database: VideoDatabase by lazy { VideoDatabase.getDatabase(app.baseContext, appScope) }
 
-    val videoList: Flow<List<VideoEntity>> = loadVideos()
+    val videoList: Flow<List<Video>> = loadVideos()
 
-    private fun loadVideos(): Flow<List<VideoEntity>> {
+    private fun loadVideos(): Flow<List<Video>> {
         loadVideosFromService()
         return getVideosFromDb()
     }
 
-    private fun loadVideosFromService(): MutableStateFlow<List<VideoEntity>> {
-        val videos = MutableStateFlow(listOf<VideoEntity>())
+    private fun loadVideosFromService() {
         vimeoService.getVideos()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : DisposableSingleObserver<VideoPlaylistPage>() {
                 override fun onSuccess(response: VideoPlaylistPage) {
                     val models = VideoListMapper(VideoMapperVideoDtoToVideo()).map(response.videos)
-                    videos.value = VideoListMapper(VideoMapperVideoToVideoEntity()).map(models)
                     appScope.launch { insertVideos(models) }
                 }
 
                 override fun onError(e: Throwable) { }
             })
-        return videos
     }
 
     fun getVideo(videoId: String): LiveData<Video> {
@@ -70,11 +68,17 @@ class Repository(private val app: App) {
         database.videoDao().insert(entities)
     }
 
-    private fun getVideosFromDb(): Flow<List<VideoEntity>> {
-        val dataFromDb = database.videoDao().getAllVideos()
-        dataFromDb.map {
-
+    private fun getVideosFromDb(): Flow<List<Video>> {
+        val stateFlow = MutableStateFlow(listOf<Video>())
+        appScope.launch(Dispatchers.IO) {
+            try {
+                database.videoDao().getAllVideos().collect {
+                    stateFlow.value = VideoListMapper(VideoMapperVideoEntityToVideo()).map(it)
+                }
+            } catch (e: Throwable) {
+                e.printStackTrace()
+            }
         }
-        return dataFromDb
+        return stateFlow
     }
 }

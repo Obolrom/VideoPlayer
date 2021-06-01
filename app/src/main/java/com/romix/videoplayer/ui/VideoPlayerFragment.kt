@@ -1,16 +1,22 @@
 package com.romix.videoplayer.ui
 
+import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.exoplayer2.util.MimeTypes
 import com.google.android.exoplayer2.util.Util
 import com.romix.videoplayer.databinding.FragmentVideoPlayerBinding
 
@@ -21,13 +27,11 @@ class VideoPlayerFragment : Fragment() {
 
     private lateinit var sharedVideoViewModel: SharedVideoViewModel
     private var _binding: FragmentVideoPlayerBinding? = null
+    private val playbackStateListener: PlaybackStateListener = PlaybackStateListener()
     private lateinit var playerView: PlayerView
     private var player: ExoPlayer? = null
 
-    // FIXME: 30.05.21 move it to the class, maybe cache it
-    private var playWhenReady = true
-    private var currentWindow = 0
-    private var playbackPosition: Long = 0
+    private var videoState: VideoState = VideoState()
 
     private val binding get() = _binding!!
 
@@ -43,15 +47,19 @@ class VideoPlayerFragment : Fragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        initPlayer()
+    private fun initPlaylist() {
+        videoState.currentWindow = sharedVideoViewModel.videoIndex.value ?: 0
 
-        sharedVideoViewModel.currentVideo.observe(viewLifecycleOwner, {
-            player?.setMediaItem(MediaItem.Builder()
-                .setUri(it.videoLink)
-                .build())
-            startPlay()
+        sharedVideoViewModel.playlist.observe(viewLifecycleOwner, {
+            val mediaItems = mutableListOf<MediaItem>()
+            it.forEach { video ->
+                mediaItems.add(MediaItem.Builder()
+                    .setUri(video.videoLink)
+                    .setMediaId(video.videoId.toString())
+                    .setMimeType(MimeTypes.APPLICATION_MP4)
+                    .build())
+            }
+            player?.addMediaItems(mediaItems)
         })
     }
 
@@ -68,21 +76,26 @@ class VideoPlayerFragment : Fragment() {
         }
 
         playerView.player = player
+        player?.addListener(playbackStateListener)
+        initPlaylist()
+        startPlay()
     }
 
     private fun startPlay() {
         with(player!!) {
             playWhenReady = playWhenReady
-            seekTo(currentWindow, playbackPosition)
+            seekTo(videoState.currentWindow, videoState.playbackPosition)
             prepare()
+            play()
         }
     }
 
     private fun releasePlayer() {
         player?.let {
-            playbackPosition = it.currentPosition
-            currentWindow = it.currentWindowIndex
-            playWhenReady = it.playWhenReady
+            videoState.playbackPosition = it.currentPosition
+            videoState.currentWindow = it.currentWindowIndex
+            videoState.playWhenReady = it.playWhenReady
+            it.removeListener(playbackStateListener)
             it.release()
             player = null
         }
@@ -119,5 +132,20 @@ class VideoPlayerFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private inner class PlaybackStateListener(): Player.Listener {
+
+        override fun onPlaybackStateChanged(state: Int) {
+            super.onPlaybackStateChanged(state)
+            val stateString = when (state) {
+                ExoPlayer.STATE_IDLE -> "ExoPlayer.STATE_IDLE      -"
+                ExoPlayer.STATE_BUFFERING -> "ExoPlayer.STATE_BUFFERING -"
+                ExoPlayer.STATE_READY -> "ExoPlayer.STATE_READY     -"
+                ExoPlayer.STATE_ENDED -> "ExoPlayer.STATE_ENDED     -"
+                else -> "UNKNOWN_STATE             -"
+            }
+            Log.d("playerState", "changed state to $stateString")
+        }
     }
 }

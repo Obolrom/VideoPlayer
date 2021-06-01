@@ -10,7 +10,7 @@ import com.romix.videoplayer.room.VideoEntity
 
 class VideoViewModel(private val repository: Repository): ViewModel() {
 
-    val videos: LiveData<List<VideoEntity>> = repository.videoList.asLiveData()
+    val videos: LiveData<List<Video>> = repository.videoList.asLiveData()
 
     fun getVideo(videoId: String): LiveData<Video> {
         return repository.getVideo(videoId)
