@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.exoplayer2.ExoPlayer
@@ -30,10 +31,7 @@ class VideoPlayerFragment : Fragment() {
     private lateinit var playerView: PlayerView
     private var player: ExoPlayer? = null
 
-    // FIXME: 30.05.21 move it to the class
-    private var playWhenReady = true
-    private var currentWindow = 0
-    private var playbackPosition: Long = 0
+    private var videoState: VideoState = VideoState()
 
     private val binding get() = _binding!!
 
@@ -84,7 +82,7 @@ class VideoPlayerFragment : Fragment() {
     private fun startPlay() {
         with(player!!) {
             playWhenReady = playWhenReady
-            seekTo(currentWindow, playbackPosition)
+            seekTo(videoState.currentWindow, videoState.playbackPosition)
             prepare()
             play()
         }
@@ -92,9 +90,9 @@ class VideoPlayerFragment : Fragment() {
 
     private fun releasePlayer() {
         player?.let {
-            playbackPosition = it.currentPosition
-            currentWindow = it.currentWindowIndex
-            playWhenReady = it.playWhenReady
+            videoState.playbackPosition = it.currentPosition
+            videoState.currentWindow = it.currentWindowIndex
+            videoState.playWhenReady = it.playWhenReady
             it.removeListener(playbackStateListener)
             it.release()
             player = null
